@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brain Tumor Detection | CNN Deep Learning</title>
+  <meta name="description" content="Brain Tumor Detection using Convolutional Neural Networks — 95.80% accuracy on 4,600 MRI images." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+    <div class="nav-logo">
+      <i class="fas fa-brain"></i>
+      <span>BrainScan<span class="accent">AI</span></span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#pipeline">Pipeline</a></li>
+      <li><a href="#architecture">Model</a></li>
+      <li><a href="#training">Training</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#tech">Tech Stack</a></li>
+    </ul>
+    <div class="nav-badge">95.80% Accuracy</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <canvas id="neuralCanvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-badge"><i class="fas fa-microscope"></i> Deep Learning · Medical Imaging</div>
+    <h1 class="hero-title">Brain Tumor<br/><span class="gradient-text">Detection</span></h1>
+    <p class="hero-subtitle">Convolutional Neural Network trained on 4,600 MRI scans to classify brain tumors with high precision and recall.</p>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <div class="stat-value" data-target="95.80" data-suffix="%">0%</div>
+        <div class="stat-label">Test Accuracy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" data-target="4600" data-suffix="">0</div>
+        <div class="stat-label">MRI Images</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" data-target="2" data-suffix=" Classes">0</div>
+        <div class="stat-label">Classification</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" data-target="0.1691" data-suffix="">0</div>
+        <div class="stat-label">Test Loss</div>
+      </div>
+    </div>
+    <div class="hero-cta">
+      <a href="#overview" class="btn-primary"><i class="fas fa-arrow-down"></i> Explore Project</a>
+      <a href="#results" class="btn-secondary"><i class="fas fa-chart-bar"></i> View Results</a>
+    </div>
+  </div>
+  <div class="scroll-indicator"><i class="fas fa-chevron-down"></i></div>
+</section>
+
+<!-- OVERVIEW -->
+<section class="section" id="overview">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag"><i class="fas fa-info-circle"></i> Project Overview</div>
+      <h2>What This Project <span class="gradient-text">Does</span></h2>
+      <p>A binary image classification system that detects the presence of brain tumors in MRI scans using a custom CNN architecture trained on Google Colab with GPU acceleration.</p>
+    </div>
+    <div class="overview-grid">
+      <div class="glass-card fade-in">
+        <div class="card-icon"><i class="fas fa-database"></i></div>
+        <h3>Dataset</h3>
+        <p>4,600 MRI brain scans sourced from a curated dataset with metadata including format, mode, and shape for each image.</p>
+        <div class="tag-row">
+          <span class="tag">JPEG</span><span class="tag">PNG</span><span class="tag">TIFF</span>
+        </div>
+      </div>
+      <div class="glass-card fade-in">
+        <div class="card-icon"><i class="fas fa-tag"></i></div>
+        <h3>Classes</h3>
+        <div class="class-bars">
+          <div class="class-item">
+            <div class="class-label"><span class="dot tumor"></span>Tumor</div>
+            <div class="class-bar"><div class="bar-fill" style="width:54.6%"></div></div>
+            <span class="class-count">2,513</span>
+          </div>
+          <div class="class-item">
+            <div class="class-label"><span class="dot healthy"></span>Healthy</div>
+            <div class="class-bar"><div class="bar-fill healthy-fill" style="width:45.4%"></div></div>
+            <span class="class-count">2,087</span>
+          </div>
+        </div>
+      </div>
+      <div class="glass-card fade-in">
+        <div class="card-icon"><i class="fab fa-google"></i></div>
+        <h3>Environment</h3>
+        <p>Trained on <strong>Google Colab</strong> with <strong>NVIDIA T4 GPU</strong> acceleration. Dataset stored and accessed from Google Drive.</p>
+        <div class="tag-row">
+          <span class="tag">T4 GPU</span><span class="tag">Colab</span><span class="tag">Drive</span>
+        </div>
+      </div>
+      <div class="glass-card fade-in">
+        <div class="card-icon"><i class="fas fa-folder-tree"></i></div>
+        <h3>Structure</h3>
+        <pre class="file-tree">Brain Tumor Data Set/
+├── Brain Tumor/
+│   └── Cancer (1).jpg ...
+└── Healthy/
+    └── Not Cancer (1).jpg ...</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section class="section dark-section" id="pipeline">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag"><i class="fas fa-project-diagram"></i> Data Pipeline</div>
+      <h2>From Raw Data to <span class="gradient-text">Model Input</span></h2>
+    </div>
+    <div class="pipeline-steps">
+      <div class="pipeline-step fade-in">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3><i class="fas fa-download"></i> Data Loading</h3>
+          <p>Load ZIP from Google Drive, extract dataset, read metadata CSV with image paths, class labels, formats and shapes.</p>
+          <div class="code-snippet">zip_ref.extractall('/content/dataset')</div>
+        </div>
+      </div>
+      <div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>
+      <div class="pipeline-step fade-in">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3><i class="fas fa-crop-alt"></i> Preprocessing</h3>
+          <p>Resize all images to <strong>224×224</strong> pixels, convert to RGB, normalize pixel values to <strong>[0, 1]</strong> range.</p>
+          <div class="code-snippet">img_array / 255.0</div>
+        </div>
+      </div>
+      <div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>
+      <div class="pipeline-step fade-in">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3><i class="fas fa-cut"></i> Data Split</h3>
+          <div class="split-visual">
+            <div class="split-bar train">70%<br/>Train<br/>3,220</div>
+            <div class="split-bar val">15%<br/>Val<br/>690</div>
+            <div class="split-bar test">15%<br/>Test<br/>690</div>
+          </div>
+          <div class="code-snippet">train_test_split(stratify=labels)</div>
+        </div>
+      </div>
+      <div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>
+      <div class="pipeline-step fade-in">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h3><i class="fas fa-save"></i> NumPy Arrays</h3>
+          <p>Save preprocessed arrays as <code>images.npy</code> and <code>labels.npy</code> to Google Drive for fast reloading.</p>
+          <div class="code-snippet">np.save('images.npy', images)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section" id="architecture">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag"><i class="fas fa-network-wired"></i> CNN Architecture</div>
+      <h2>Model <span class="gradient-text">Architecture</span></h2>
+      <p>A custom Convolutional Neural Network designed for binary classification of brain MRI images.</p>
+    </div>
+    <div class="arch-container fade-in">
+      <div class="arch-diagram">
+        <div class="arch-input">
+          <div class="arch-box input-box">
+            <i class="fas fa-image"></i>
+            <div>Input</div>
+            <div class="arch-dim">224×224×3</div>
+          </div>
+        </div>
+        <div class="arch-arrow"><i class="fas fa-arrow-down"></i></div>
+        <div class="arch-block conv-block">
+          <div class="arch-box">Conv2D (32)</div>
+          <div class="arch-box">MaxPooling2D</div>
+          <div class="arch-box">BatchNorm</div>
+          <div class="block-label">Block 1</div>
+        </div>
+        <div class="arch-arrow"><i class="fas fa-arrow-down"></i></div>
+        <div class="arch-block conv-block b2">
+          <div class="arch-box">Conv2D (64)</div>
+          <div class="arch-box">MaxPooling2D</div>
+          <div class="arch-box">BatchNorm</div>
+          <div class="block-label">Block 2</div>
+        </div>
+        <div class="arch-arrow"><i class="fas fa-arrow-down"></i></div>
+        <div class="arch-block conv-block b3">
+          <div class="arch-box">Conv2D (128)</div>
+          <div class="arch-box">MaxPooling2D</div>
+          <div class="arch-box">BatchNorm</div>
+          <div class="block-label">Block 3</div>
+        </div>
+        <div class="arch-arrow"><i class="fas fa-arrow-down"></i></div>
+        <div class="arch-block dense-block">
+          <div class="arch-box">Flatten</div>
+          <div class="arch-box">Dense (256) + ReLU</div>
+          <div class="arch-box">Dropout (0.5)</div>
+          <div class="arch-box output-box">Dense (1) + Sigmoid</div>
+          <div class="block-label">Classifier</div>
+        </div>
+        <div class="arch-arrow"><i class="fas fa-arrow-down"></i></div>
+        <div class="arch-output">
+          <div class="output-label tumor-label"><i class="fas fa-circle"></i> Tumor</div>
+          <div class="output-label healthy-label"><i class="fas fa-circle"></i> Healthy</div>
+        </div>
+      </div>
+      <div class="arch-details">
+        <div class="detail-card">
+          <h4><i class="fas fa-cogs"></i> Configuration</h4>
+          <table class="detail-table">
+            <tr><td>Optimizer</td><td><span class="tag">Adam</span></td></tr>
+            <tr><td>Loss</td><td><span class="tag">Binary Crossentropy</span></td></tr>
+            <tr><td>Metric</td><td><span class="tag">Accuracy</span></td></tr>
+            <tr><td>Activation</td><td><span class="tag">ReLU / Sigmoid</span></td></tr>
+            <tr><td>Regularization</td><td><span class="tag">Dropout 0.5</span></td></tr>
+          </table>
+        </div>
+        <div class="detail-card">
+          <h4><i class="fas fa-layer-group"></i> Layer Details</h4>
+          <table class="detail-table">
+            <tr><td>Input Shape</td><td><code>224×224×3</code></td></tr>
+            <tr><td>Conv Filters</td><td><code>32 → 64 → 128</code></td></tr>
+            <tr><td>Kernel Size</td><td><code>3×3</code></td></tr>
+            <tr><td>Pool Size</td><td><code>2×2</code></td></tr>
+            <tr><td>Dense Units</td><td><code>256 → 1</code></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRAINING -->
+<section class="section dark-section" id="training">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag"><i class="fas fa-dumbbell"></i> Training</div>
+      <h2>Training <span class="gradient-text">History</span></h2>
+      <p>Model trained for 18 epochs with EarlyStopping (patience=5) monitoring validation loss.</p>
+    </div>
+    <div class="training-config fade-in">
+      <div class="config-pill"><i class="fas fa-list-ol"></i> Max 20 Epochs</div>
+      <div class="config-pill"><i class="fas fa-layer-group"></i> Batch Size: 32</div>
+      <div class="config-pill"><i class="fas fa-stop-circle"></i> EarlyStopping (patience=5)</div>
+      <div class="config-pill"><i class="fas fa-medal"></i> ModelCheckpoint</div>
+    </div>
+    <div class="training-layout fade-in">
+      <div class="epoch-table-wrap">
+        <table class="epoch-table">
+          <thead>
+            <tr><th>Epoch</th><th>Train Acc</th><th>Val Acc</th><th>Train Loss</th><th>Val Loss</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>70.34%</td><td>54.64%</td><td>4.7448</td><td>7.1517</td></tr>
+            <tr><td>2</td><td>77.45%</td><td>58.99%</td><td>0.4936</td><td>2.2179</td></tr>
+            <tr><td>3</td><td>83.39%</td><td>69.42%</td><td>0.3707</td><td>1.4856</td></tr>
+            <tr><td>4</td><td>86.12%</td><td>82.17%</td><td>0.3360</td><td>0.6711</td></tr>
+            <tr><td>5</td><td>86.30%</td><td>83.04%</td><td>0.4251</td><td>0.4121</td></tr>
+            <tr><td>6</td><td>88.35%</td><td>88.55%</td><td>0.2683</td><td>0.4187</td></tr>
+            <tr><td>7</td><td>89.53%</td><td>91.01%</td><td>0.2340</td><td>0.2235</td></tr>
+            <tr class="best-row"><td>8 ⭐</td><td>91.37%</td><td>93.04%</td><td>0.1868</td><td>0.1745</td></tr>
+            <tr><td>9</td><td>92.39%</td><td>82.75%</td><td>0.1670</td><td>0.4853</td></tr>
+            <tr><td>10</td><td>93.73%</td><td>92.90%</td><td>0.1484</td><td>0.1813</td></tr>
+            <tr><td>11</td><td>93.54%</td><td>93.62%</td><td>0.1464</td><td>0.1699</td></tr>
+            <tr><td>12</td><td>95.56%</td><td>94.06%</td><td>0.1000</td><td>0.1935</td></tr>
+            <tr class="best-row"><td>13 ⭐</td><td>94.38%</td><td>96.96%</td><td>0.1129</td><td>0.0683</td></tr>
+            <tr><td>14</td><td>94.35%</td><td>91.74%</td><td>0.1112</td><td>0.2362</td></tr>
+            <tr><td>15</td><td>95.09%</td><td>93.91%</td><td>0.1145</td><td>0.1385</td></tr>
+            <tr><td>16</td><td>94.84%</td><td>96.52%</td><td>0.1091</td><td>0.1105</td></tr>
+            <tr><td>17</td><td>92.58%</td><td>84.06%</td><td>0.3549</td><td>1.1978</td></tr>
+            <tr><td>18</td><td>79.22%</td><td>63.04%</td><td>1.0339</td><td>19.6419</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="trainingChart" width="400" height="300"></canvas>
+        <div class="chart-legend">
+          <div class="legend-item"><span class="legend-dot train-dot"></span>Train Accuracy</div>
+          <div class="legend-item"><span class="legend-dot val-dot"></span>Val Accuracy</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="section" id="results">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag"><i class="fas fa-chart-bar"></i> Results</div>
+      <h2>Model <span class="gradient-text">Performance</span></h2>
+    </div>
+    <div class="results-grid">
+      <div class="result-card big-stat fade-in">
+        <div class="big-number">95.80<span>%</span></div>
+        <div class="big-label">Test Accuracy</div>
+        <div class="big-sub">Loss: 0.1691 · 690 test samples</div>
+      </div>
+      <div class="result-card fade-in">
+        <h3><i class="fas fa-table"></i> Classification Report</h3>
+        <table class="report-table">
+          <thead><tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>Support</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="dot healthy"></span>Healthy</td>
+              <td><div class="metric-bar"><div style="width:96%"></div></div>0.96</td>
+              <td><div class="metric-bar"><div style="width:94%"></div></div>0.94</td>
+              <td><div class="metric-bar"><div style="width:95%"></div></div>0.95</td>
+              <td>313</td>
+            </tr>
+            <tr>
+              <td><span class="dot tumor"></span>Tumor</td>
+              <td><div class="metric-bar"><div style="width:95%"></div></div>0.95</td>
+              <td><div class="metric-bar"><div style="width:97%"></div></div>0.97</td>
+              <td><div class="metric-bar"><div style="width:96%"></div></div>0.96</td>
+              <td>377</td>
+            </tr>
+            <tr class="avg-row">
+              <td>Macro avg</td><td>0.96</td><td>0.96</td><td>0.96</td><td>690</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="result-card fade-in">
+        <h3><i class="fas fa-grid-horizontal"></i> Confusion Matrix</h3>
+        <div class="conf-matrix">
+          <div class="conf-labels-top">
+            <div></div><div>Pred Healthy</div><div>Pred Tumor</div>
+          </div>
+          <div class="conf-row">
+            <div class="conf-side">Act Healthy</div>
+            <div class="conf-cell tp">294<div class="conf-sub">True Negative</div></div>
+            <div class="conf-cell fp">19<div class="conf-sub">False Positive</div></div>
+          </div>
+          <div class="conf-row">
+            <div class="conf-side">Act Tumor</div>
+            <div class="conf-cell fn">10<div class="conf-sub">False Negative</div></div>
+            <div class="conf-cell tn">367<div class="conf-sub">True Positive</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prediction Demo -->
+    <div class="prediction-demo fade-in">
+      <h3><i class="fas fa-search"></i> Prediction Logic</h3>
+      <div class="pred-boxes">
+        <div class="pred-box tumor-pred">
+          <div class="pred-icon"><i class="fas fa-circle-exclamation"></i></div>
+          <div class="pred-title">TUMOR 🔴 Detected</div>
+          <div class="pred-desc">score &gt; 0.5 → Tumor classification<br/>Higher confidence = closer to 1.0</div>
+          <div class="pred-code">prediction &gt; 0.5 → "TUMOR"</div>
+        </div>
+        <div class="pred-arrow"><i class="fas fa-arrows-left-right"></i></div>
+        <div class="pred-box healthy-pred">
+          <div class="pred-icon"><i class="fas fa-circle-check"></i></div>
+          <div class="pred-title">HEALTHY 🟢 Normal</div>
+          <div class="pred-desc">score ≤ 0.5 → Healthy classification<br/>Higher confidence = closer to 0.0</div>
+          <div class="pred-code">prediction ≤ 0.5 → "HEALTHY"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section class="section dark-section" id="tech">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag"><i class="fas fa-code"></i> Tech Stack</div>
+      <h2>Built <span class="gradient-text">With</span></h2>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-card fade-in"><div class="tech-icon python"></div><span>Python</span></div>
+      <div class="tech-card fade-in"><div class="tech-icon tensorflow"></div><span>TensorFlow / Keras</span></div>
+      <div class="tech-card fade-in"><div class="tech-icon numpy"></div><span>NumPy</span></div>
+      <div class="tech-card fade-in"><div class="tech-icon pandas"></div><span>Pandas</span></div>
+      <div class="tech-card fade-in"><div class="tech-icon matplotlib"></div><span>Matplotlib</span></div>
+      <div class="tech-card fade-in"><div class="tech-icon seaborn"></div><span>Seaborn</span></div>
+      <div class="tech-card fade-in"><div class="tech-icon sklearn"></div><span>scikit-learn</span></div>
+      <div class="tech-card fade-in"><div class="tech-icon colab"></div><span>Google Colab</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO -->
+<section class="section" id="demo">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag"><i class="fas fa-flask"></i> Live Demo</div>
+      <h2>Try the <span class="gradient-text">Model</span></h2>
+      <p>Upload a brain MRI scan and the CNN model will predict whether a tumor is present — running entirely in your browser.</p>
+    </div>
+
+    <!-- Setup Instructions -->
+    <div class="demo-instructions fade-in">
+      <div class="inst-header"><i class="fas fa-circle-info"></i> Setup Required — One Time Only</div>
+      <div class="inst-steps">
+        <div class="inst-step">
+          <div class="inst-num">1</div>
+          <div>
+            <strong>Open your Colab notebook</strong> and run the <code>convert_model_colab.py</code> script that was created in your project folder. It will download a file called <code>tfjs_model_export.zip</code>.
+          </div>
+        </div>
+        <div class="inst-step">
+          <div class="inst-num">2</div>
+          <div>
+            <strong>Extract the zip file.</strong> You'll get a folder named <code>tfjs_model</code> containing <code>model.json</code> and binary weight files.
+          </div>
+        </div>
+        <div class="inst-step">
+          <div class="inst-num">3</div>
+          <div>
+            <strong>Place the <code>tfjs_model</code> folder</strong> inside your project folder:<br/>
+            <code>Brain Tumor Detection/tfjs_model/model.json</code>
+          </div>
+        </div>
+        <div class="inst-step">
+          <div class="inst-num">4</div>
+          <div>
+            <strong>⚠️ Serve locally</strong> — The model won't load from <code>file://</code>. Use VS Code's <strong>Live Server</strong> extension (right-click index.html → Open with Live Server) or run:<br/>
+            <code>python -m http.server 8000</code> then open <code>http://localhost:8000</code>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demo UI -->
+    <div class="demo-ui fade-in">
+      <!-- Load Model Button -->
+      <div class="load-model-wrap">
+        <button id="load-model-btn" class="btn-primary">
+          <i class="fas fa-brain"></i> Load AI Model
+        </button>
+        <div id="model-status" class="model-status idle">Click "Load AI Model" to initialize the neural network.</div>
+      </div>
+
+      <!-- Upload + Preview -->
+      <div class="demo-content">
+        <div class="upload-panel">
+          <div id="upload-zone" class="upload-zone disabled">
+            <div id="upload-prompt">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Drop MRI image here or click to browse</p>
+              <span>JPG, PNG, TIFF supported</span>
+            </div>
+            <div id="preview-wrap" class="hidden">
+              <img id="preview-img" src="" alt="MRI Preview" />
+              <button id="reset-btn" class="reset-btn"><i class="fas fa-redo"></i> Upload Different Image</button>
+            </div>
+          </div>
+          <input type="file" id="image-input" accept="image/*" style="display:none" disabled />
+        </div>
+
+        <!-- Prediction Result -->
+        <div id="prediction-result" class="prediction-result hidden">
+          <div class="pred-result-icon" id="pred-icon">⏳</div>
+          <div class="pred-result-label" id="pred-label">Analyzing...</div>
+          <div class="pred-bar-wrap">
+            <div class="pred-bar-track">
+              <div class="pred-bar-fill" id="confidence-bar-fill"></div>
+            </div>
+            <div class="pred-confidence" id="confidence-text"></div>
+          </div>
+          <div class="pred-note">Score closer to 1.0 = Tumor &nbsp;|&nbsp; Score closer to 0.0 = Healthy</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-logo"><i class="fas fa-brain"></i> BrainScan<span class="accent">AI</span></div>
+      <p>Brain Tumor Detection using CNN · 95.80% Test Accuracy · 4,600 MRI Images</p>
+      <div class="footer-tags">
+        <span class="tag">Deep Learning</span>
+        <span class="tag">Medical Imaging</span>
+        <span class="tag">CNN</span>
+        <span class="tag">Binary Classification</span>
+        <span class="tag">Google Colab</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script src="predictor.js"></script>
+</body>
+</html>
